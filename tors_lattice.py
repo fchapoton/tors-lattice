@@ -7,7 +7,7 @@ This module defines :class: `FiniteTorsLattice`, which is a subclass of
 together with various methods which are useful in the study of
 the representation theory of algebras.
 
-Requirement: SageMath ver 9.x or later
+Requirement: SageMath version 9.x or later
 """
 # *****************************************************************************
 #       Copyright (C) 2021 Haruhisa Enomoto <the35883@osakafu-u.ac.jp>
@@ -26,6 +26,7 @@ from sage.misc.cachefunc import cached_method
 from sage.combinat.posets.lattices import FiniteLatticePoset, LatticePoset
 from sage.combinat.posets.posets import Poset
 from sage.homology.simplicial_complex import SimplicialComplex
+
 
 def _kappa(lattice, j):
     r"""
@@ -46,15 +47,16 @@ def _kappa(lattice, j):
     an element of ``lattice``, or ``None`` if it does not exist.
 
     .. SEEALSO::
-      :meth:`sage.combinat.posets.hasse_diagram.HasseDiagram.kappa`
+    
+        :meth:`sage.combinat.posets.hasse_diagram.HasseDiagram.kappa`
     """
     hasse = lattice._hasse_diagram
     j_vtx = lattice._element_to_vertex(j)
     m_vtx = hasse.kappa(j_vtx)
     if m_vtx is None:
         return None
-    m = lattice._vertex_to_element(m_vtx)
-    return m
+    return lattice._vertex_to_element(m_vtx)
+
 
 def _extended_kappa(lattice, x):
     r"""
@@ -63,7 +65,7 @@ def _extended_kappa(lattice, x):
 
     This first computes the canonical joinands of `x`,
     and then computes the meet of kappa of them.
-    This returns ``None`` if ``x`` admits no canonical join reprensetation
+    This returns ``None`` if ``x`` admits no canonical join representation
     or kappa of some canonical joinand does not exist.
 
     INPUT:
@@ -81,7 +83,7 @@ def _extended_kappa(lattice, x):
     REFERENCES:
 
     .. [BTZ] E. Barnard, G. Todorov, S. Zhu,
-       Dynamical combinatorics and torsion classes,
+       *Dynamical combinatorics and torsion classes*,
        J. Pure Appl. Algebra 225 (2021), no. 9, 106642.
 
     """
@@ -94,12 +96,13 @@ def _extended_kappa(lattice, x):
     except:
         return None
 
+
 def myshow(poset, label = True, vertex_size = 100, **kwargs):
     r"""
     A variant of ``show`` method, which looks nicer for the Hasse diagram of a poset.
 
     NOTE that the direction of Hasse arrows in SageMath is opposite to
-    the representation-threorist's convention, that is,
+    the representation-theorist's convention, that is,
     there is an arrow $p \to q$ if $p$ is covered by $q$.
 
     INPUT:
@@ -119,12 +122,13 @@ def myshow(poset, label = True, vertex_size = 100, **kwargs):
         poset.show(vertex_color = "white", vertex_shape = "_",
                    vertex_size = vertex_size, aspect_ratio = "automatic", **kwargs)
     else:
-        poset.show(label_elements= False, vertex_size = vertex_size,
-                   aspect_ratio = "automatic", **kwargs)
+        poset.show(label_elements=False, vertex_size=vertex_size,
+                   aspect_ratio="automatic", **kwargs)
 
-def TorsLattice(data = None, *args, **kwargs):
+
+def TorsLattice(data=None, *args, **kwargs):
     """
-    Construct a lattice of torsion classes from various forms of input data
+    Construct a lattice of torsion classes from various forms of input data.
 
     This raises an error if the constructed lattice is not semidistributive,
     since the lattice of torsion classes is semidistributive.
@@ -147,6 +151,7 @@ def TorsLattice(data = None, *args, **kwargs):
         raise ValueError("This lattice is not semidistributive.")
     return FiniteTorsLattice(L)
 
+
 class FiniteTorsLattice(FiniteLatticePoset):
     """
     A subclass of :class:`FiniteLatticePoset`,
@@ -162,28 +167,28 @@ class FiniteTorsLattice(FiniteLatticePoset):
     @cached_method
     def zero(self):
         """
-        Return the smallest torsion class $0$
+        Return the smallest torsion class `0`.
         """
         return self.bottom()
 
     @cached_method
     def whole(self):
         """
-        Return the largest torsion class, i.e. the whole abelian category
+        Return the largest torsion class, i.e. the whole abelian category.
         """
         return self.top()
 
     @cached_method
     def all_itvs(self):
         """
-        Return the set of all intervals in the torsion poset
+        Return the set of all intervals in the torsion poset.
         """
-        return {(U,T) for U in self for T in self if self.is_lequal(U,T)}
+        return set(tuple(uv) for uv in self.relations_iterator())
 
     @cached_method
     def simples(self):
         """
-        Return the set of simple torsion classes
+        Return the set of simple torsion classes.
 
         Here a simple torsion class is a Serre subcategory which contains
         exactly one simple module, or equivalently,
@@ -195,7 +200,7 @@ class FiniteTorsLattice(FiniteLatticePoset):
     @cached_method
     def all_bricks(self):
         """
-        Return the set of all bricks represented by join-irreducibles
+        Return the set of all bricks represented by join-irreducibles.
 
         We always use join-irreducible torsion classes
         to represent bricks by a bijection in [DIRRT].
@@ -203,7 +208,7 @@ class FiniteTorsLattice(FiniteLatticePoset):
         REFERENCES:
 
         .. [DIRRT] L. Demonet, O. Iyama, N. Reading, I. Reiten, H. Thomas,
-           Lattice theory of torsion classes, arXiv:1711.01785.
+           *Lattice theory of torsion classes*, arXiv:1711.01785.
 
         """
         return set(self.join_irreducibles())
@@ -211,17 +216,17 @@ class FiniteTorsLattice(FiniteLatticePoset):
     @cached_method
     def kappa(self, T):
         r"""
-        Return the (extended) kappa map of ``T``
+        Return the (extended) kappa map of ``T``.
 
         This is computed as follows:
         Let $B_1,\dots, B_k$ be brick labels of all arrows starting from $T$.
         Then $T$ is the join of $T(B_1), \dots, T(B_k)$,
-        where $T(B)$ is the smallest torsion classes containing $B$.
+        where $T(B)$ is the smallest torsion class containing $B$.
         The kappa map $\kappa(T)$ is defined to be the intersection of
         $^\perp B_1, \dots, {}^\perp B_k$.
         This operation maps the canonical join representation
         to the canonical meet representation.
-        See [BTZ] for the detail.
+        See [BTZ]_ for the detail.
 
         INPUT:
 
@@ -234,7 +239,7 @@ class FiniteTorsLattice(FiniteLatticePoset):
         REFERENCES:
 
         .. [BTZ] E. Barnard, G. Todorov, S. Zhu,
-           Dynamical combinatorics and torsion classes,
+           *Dynamical combinatorics and torsion classes*,
            J. Pure Appl. Algebra 225 (2021), no. 9, 106642.
         """
         T = self(T) # Make sure that it is an element of `self`
@@ -243,7 +248,7 @@ class FiniteTorsLattice(FiniteLatticePoset):
     @cached_method
     def bricks_in_tors(self, T):
         r"""
-        Return the set of bricks contained in a torsion class ``T``
+        Return the set of bricks contained in a torsion class ``T``.
 
         INPUT:
 
@@ -256,12 +261,12 @@ class FiniteTorsLattice(FiniteLatticePoset):
 
         """
         T = self(T) # Make sure that it is an element of `self`
-        return frozenset({j for j in self.all_bricks() if self.is_lequal(j,T)})
+        return frozenset({j for j in self.all_bricks() if self.is_lequal(j, T)})
 
     @cached_method
     def bricks_in_torf(self, T):
         r"""
-        Return the set of bricks contained in a torsion-free class $T^\perp$
+        Return the set of bricks contained in a torsion-free class $T^\perp$.
 
         INPUT:
 
@@ -275,12 +280,12 @@ class FiniteTorsLattice(FiniteLatticePoset):
         """
         T = self(T) # Make sure that it is an element of `self`
         return frozenset(j for j in self.all_bricks()
-                         if self.is_gequal(self.kappa(j),T) )
+                         if self.is_gequal(self.kappa(j), T) )
 
     @cached_method
     def bricks(self, itv, *, check = True):
         r"""
-        Return the set of bricks in the heart of an interval of torsion classes
+        Return the set of bricks in the heart of an interval of torsion classes.
 
         For two torsion classes $U,T$ with $U \subseteq T$,
         its heart is $T \cap U^\perp$ (see [ES]).
@@ -305,17 +310,17 @@ class FiniteTorsLattice(FiniteLatticePoset):
         """
         U, T = itv
         U, T = self(U), self(T) # Make sure that they are elements of `self`
-        if check and not self.is_lequal(U,T):
+        if check and not self.is_lequal(U, T):
             raise ValueError("This is not an interval.")
         return self.bricks_in_tors(T) & self.bricks_in_torf(U)
 
     @cached_method
     def label(self, itv, *, check = True):
         r"""
-        Return the brick label of an Hasse arrow in the lattice of torsion classes
+        Return the brick label of an Hasse arrow in the lattice of torsion classes.
 
         For a Hasse arrow $T \to U$, its label is a unique brick
-        contained in $T \cap U^\perp$ [DIRRT].
+        contained in $T \cap U^\perp$ [DIRRT]_.
 
         INPUT:
 
@@ -333,12 +338,12 @@ class FiniteTorsLattice(FiniteLatticePoset):
         if check and len(bricks_in) > 1:
             raise ValueError("The heart contains more than one brick, \
                              so not a covering relation.")
-        return list(bricks_in)[0]
+        return next(iter(bricks_in))
 
     @cached_method
     def plus(self, U):
         """
-        Return the join of all Hasse arrows ending at ``U``
+        Return the join of all Hasse arrows ending at ``U``.
 
         For a torsion class $U$, its plus $U^{+}$ satisfies that
         $[U,U^{+}]$ is a wide interval which is the largest wide interval
@@ -357,7 +362,7 @@ class FiniteTorsLattice(FiniteLatticePoset):
     @cached_method
     def minus(self, T):
         """
-        Return the meet of all Hasse arrows starting at ``T``
+        Return the meet of all Hasse arrows starting at ``T``.
 
         For a torsion class $T$, its minus $T^{-}$ satisfies that
         $[T^{-},T]$ is a wide interval which is the largest wide interval
@@ -373,14 +378,14 @@ class FiniteTorsLattice(FiniteLatticePoset):
         lower = self.lower_covers(T)
         return self.meet(lower)
 
-    def is_wide_itv(self, itv, *, check = True):
+    def is_wide_itv(self, itv, *, check = True) -> bool:
         r"""
-        Return ``True`` if ``itv`` is a wide interval, and ``False`` otherwise
+        Return ``True`` if ``itv`` is a wide interval, and ``False`` otherwise.
 
         An interval $[U,T]$ is a wide interval if its heart
         $T \cap U^\perp$ is a wide subcategory.
         This method uses a characterization of wide intervals
-        given in [AP].
+        given in [AP]_.
 
         INPUT:
 
@@ -393,27 +398,27 @@ class FiniteTorsLattice(FiniteLatticePoset):
         REFERENCES:
 
         .. [AP] S. Asai, C. Pfeifer,
-           Wide subcategories and lattices of torsion classes,
+           *Wide subcategories and lattices of torsion classes*,
            arXiv:1905.01148.
         """
         U, T = itv
         U, T = self(U), self(T) # Make sure that they are elements of `self`
-        if check and not self.is_lequal(U,T):
+        if check and not self.is_lequal(U, T):
             raise ValueError("This is not an interval.")
         if U == T:
             return True
-        covers = [x for x in self.upper_covers(U) if self.is_lequal(x,T)]
+        covers = [x for x in self.upper_covers(U) if self.is_lequal(x, T)]
         return T == self.join(covers)
 
-    def is_ice_itv(self, itv, *, check = True):
+    def is_ice_itv(self, itv, *, check = True) -> bool:
         r"""
-        Return ``True`` if ``itv`` is an ICE interval, and ``False`` otherwise
+        Return ``True`` if ``itv`` is an ICE interval, and ``False`` otherwise.
 
         An interval $[U,T]$ is a wide interval if its heart
         $T \cap U^\perp$ is an ICE-closed subcategory, that is,
         closed under taking images, cokernels, and extensions.
         This method uses a characterization of ICE intervals
-        given in [ES].
+        given in [ES]_.
 
         INPUT:
 
@@ -431,18 +436,18 @@ class FiniteTorsLattice(FiniteLatticePoset):
         """
         U,T = itv
         U, T = self(U), self(T) # Make sure that they are elements of `self`
-        if check and not self.is_lequal(U,T):
+        if check and not self.is_lequal(U, T):
             raise ValueError("This is not an interval.")
-        return self.is_lequal(T,self.plus(U))
+        return self.is_lequal(T, self.plus(U))
 
-    def is_ike_itv(self, itv, *, check = True):
+    def is_ike_itv(self, itv, *, check=True) -> bool:
         r"""
-        Return ``True`` if ``itv`` is an IKE interval, and ``False`` otherwise
+        Return ``True`` if ``itv`` is an IKE interval, and ``False`` otherwise.
 
         An interval $[U,T]$ is a wide interval if its heart
         $T \cap U^\perp$ is an IKE-closed subcategory, that is,
         closed under taking images, kernels, and extensions.
-        This function is just a dual of :func:`is_ice_itv`.
+        This function is just a dual of :meth:`is_ice_itv`.
 
         INPUT:
 
@@ -454,16 +459,16 @@ class FiniteTorsLattice(FiniteLatticePoset):
         """
         U,T = itv
         U, T = self(U), self(T) # Make sure that they are elements of `self`
-        if check and not self.is_lequal(U,T):
+        if check and not self.is_lequal(U, T):
             raise ValueError("This is not an interval.")
-        return self.is_lequal(self.minus(T),U)
+        return self.is_lequal(self.minus(T), U)
 
     def itv_lequal(self, itv1, itv2):
         r"""
-        Return whether the heart of ``itv1`` is contained in that of ``itv2``
+        Return whether the heart of ``itv1`` is contained in that of ``itv2``.
 
         The heart of an interval $[U,T]$ is a subcategory $T \cap U^\perp$.
-        By [DIRRT], the heart is recovered from bricks contained in it,
+        By [DIRRT]_, the heart is recovered from bricks contained in it,
         hence this function compare the sets of bricks in two hearts.
 
         INPUT:
@@ -480,7 +485,7 @@ class FiniteTorsLattice(FiniteLatticePoset):
 
     def wide_simples(self, itv):
         """
-        Return the list of simple objects in a wide subcategory corresponding to ``itv``
+        Return the list of simple objects in a wide subcategory corresponding to ``itv``.
 
         INPUT:
 
@@ -492,19 +497,19 @@ class FiniteTorsLattice(FiniteLatticePoset):
         """
         U, T = itv
         U, T = self(U), self(T) # Make sure that they are elements of `self`
-        if not self.is_wide_itv((U,T)):
+        if not self.is_wide_itv((U, T)):
             raise ValueError("This interval is not a wide interval.")
 
-        covers = [x for x in self.upper_covers(U) if self.is_lequal(x,T)]
-        return {self.label((U,x), check = False) for x in covers}
+        covers = [x for x in self.upper_covers(U) if self.is_lequal(x, T)]
+        return {self.label((U, x), check = False) for x in covers}
 
     def wide_lequal(self, U, T):
         r"""
-        Compare two wide subcategories corresponding to two torsion classes
+        Compare two wide subcategories corresponding to two torsion classes.
 
         If there are only finitely many torsion classes, then there is a bijection
         between the set of torsion classes and the set of wide subcategories
-        by [MS] for finite-dimensional algebras and [E] for an abelian length category, see also [AP].
+        by [MS]_ for finite-dimensional algebras and [E]_ for an abelian length category, see also [AP]_.
         Write $W_L(T)$ for the wide subcategory corresponding to $T$,
         which is a filtration closure of the brick labels of all Hasse arrows starting at $T$.
         Then the smallest torsion class containing $W_L(T)$ is $T$.
@@ -521,11 +526,11 @@ class FiniteTorsLattice(FiniteLatticePoset):
         REFERENCES:
 
         .. [MS] F. Marks, J. Stovicek,
-           Torsion classes, wide subcategories and localisations,
+           *Torsion classes, wide subcategories and localisations*,
            Bull. London Math. Soc. 49 (2017), Issue 3, 405–416.
 
         .. [E] H. Enomoto,
-           Monobrick, a uniform approach to torsion-free classes and wide subcategories,
+           *Monobrick, a uniform approach to torsion-free classes and wide subcategories*,
            arXiv:2005.01626.
         """
         U, T = self(U), self(T) # Make sure that they are elements of `self`
@@ -534,7 +539,7 @@ class FiniteTorsLattice(FiniteLatticePoset):
 
     def wide_lattice(self):
         """
-        Return the lattice of wide subcategories
+        Return the lattice of wide subcategories.
 
         The underlying set of this lattice is the same as ``self``, and
         its partial order is given by :meth:``wide_lequal``.
@@ -579,13 +584,13 @@ class FiniteTorsLattice(FiniteLatticePoset):
 
         an instance of :class:`sage.combinat.posets.lattices.FiniteLatticePoset`
         """
-        ike_bricks = {self.bricks(itv, check = False) for itv in self.all_itvs()
-                      if self.is_ike_itv(itv, check = False)}
+        ike_bricks = {self.bricks(itv, check=False) for itv in self.all_itvs()
+                      if self.is_ike_itv(itv, check=False)}
         return LatticePoset((ike_bricks, attrcall("issubset")))
 
     def heart_poset(self):
         """
-        Return the poset of torsion hearts ordered by inclusion
+        Return the poset of torsion hearts ordered by inclusion.
 
         A torsion heart is a subcategory which arises as a heart of some interval
         of torsion classes. For example, every wide subcategory, ICE-closed subcategory is
@@ -599,7 +604,7 @@ class FiniteTorsLattice(FiniteLatticePoset):
 
         an instance of :class:`sage.combinat.posets.posets.FinitePoset`
         """
-        brick_set = {self.bricks(itv, check = False) for itv in self.all_itvs()}
+        brick_set = {self.bricks(itv, check=False) for itv in self.all_itvs()}
         return Poset((brick_set, attrcall("issubset")))
 
     def indec_tau_rigid(self):
@@ -607,7 +612,7 @@ class FiniteTorsLattice(FiniteLatticePoset):
         Return the set of indecomposable $\tau$-rigid modules,
         represented by join-irreducible torsion classes.
 
-        For a $\tau$-tilting finite algebra, there is a bijection by [DIJ] between
+        For a $\tau$-tilting finite algebra, there is a bijection by [DIJ]_ between
         indecomposable $\tau$-rigid modules and join-irreducible torsion classes.
         The correspondence is $T(M) = \mathsf{Fac} M$ for a $\tau$-rigid $M$, and
         the unique indecomposable split projective object in $T$
@@ -627,7 +632,7 @@ class FiniteTorsLattice(FiniteLatticePoset):
     @cached_method
     def has_tau_rigid_summand(self, M, *, check = True):
         r"""
-        Return the set of $\tau$-tilting pairs which has ``M`` as a $\tau$-rigid summand
+        Return the set of $\tau$-tilting pairs which has ``M`` as a $\tau$-rigid summand.
 
         We consider ``self`` as the set of support $\tau$-tilting pairs.
         Then this returns the set of support $\tau$-tilting pairs
@@ -648,12 +653,12 @@ class FiniteTorsLattice(FiniteLatticePoset):
         M_plus = self.plus(M)
         # then [M, M_plus] is the set of tau-tilting pairs
         # containing (M,0) as a summand.
-        return {T for T in self if self.is_lequal(M,T) and self.is_lequal(T,M_plus) }
+        return {T for T in self if self.is_lequal(M, T) and self.is_lequal(T, M_plus) }
 
     @cached_method
     def has_support_summand(self, S, *, check = True):
         r"""
-        Return the set of $\tau$-tilting pairs which have the projective cover of ``S`` as a support summand
+        Return the set of $\tau$-tilting pairs which have the projective cover of ``S`` as a support summand.
 
         We consider ``self`` as the set of support $\tau$-tilting pairs.
         Then this returns the set of support $\tau$-tilting pairs
@@ -680,12 +685,12 @@ class FiniteTorsLattice(FiniteLatticePoset):
         # Then a $\tau$-tilting pair contains $(0,P)$ as a summand
         # if there's no non-zero map from P to any element in the corresponding torsion class $T$,
         # that is, $T$ is contained in ``non_S_Serre``.
-        return {T for T in self if self.is_lequal(T,non_S_Serre)}
+        return {T for T in self if self.is_lequal(T, non_S_Serre)}
 
     def projectives(self, T):
         r"""
         Return the set of indecomposable Ext-projectives of ``T`` represented by
-        join-irreducibles
+        join-irreducibles.
 
         We use join-irreducible torsion classes to represent indecomposable $\tau$-rigid
         modules, see :meth:``indec_tau_rigid``.
@@ -696,11 +701,11 @@ class FiniteTorsLattice(FiniteLatticePoset):
         """
         T = self(T) # Make sure that it is an element of `self`
         return {M for M in self.indec_tau_rigid()
-                if T in self.has_tau_rigid_summand(M, check = False)}
+                if T in self.has_tau_rigid_summand(M, check=False)}
 
     def composition_factors(self, T):
         r"""
-        Return the set of composition factors of all modules in ``T``
+        Return the set of composition factors of all modules in ``T``.
 
         We use simple torsion classes to represent simple modules,
         see :meth:``simples``.
@@ -710,11 +715,11 @@ class FiniteTorsLattice(FiniteLatticePoset):
         - ``T`` -- an element (torsion class) of ``self``
         """
         T = self(T) # Make sure that it is an element of `self`
-        return {S for S in self.simples() if T not in self.has_support_summand(S, check = False)}
+        return {S for S in self.simples() if T not in self.has_support_summand(S, check=False)}
 
-    def is_sincere(self, T):
+    def is_sincere(self, T) -> bool:
         r"""
-        Return ``True`` if ``T`` is a sincere torsion class and ``False`` otherwise
+        Return ``True`` if ``T`` is a sincere torsion class and ``False`` otherwise.
 
         INPUT:
 
@@ -725,7 +730,7 @@ class FiniteTorsLattice(FiniteLatticePoset):
 
     def tau_rigid_pair_summand(self, T):
         r"""
-        Return the set of indecomposable $\tau$-rigid pairs which are direct summands of ``T``
+        Return the set of indecomposable $\tau$-rigid pairs which are direct summands of ``T``.
 
         We represent indecomposable $\tau$-rigid pairs as follows.
         - For a pair $(M,0)$ with $M$ being indecomposable $\tau$-rigid,
@@ -740,17 +745,17 @@ class FiniteTorsLattice(FiniteLatticePoset):
         - ``T`` -- an element of ``self`` considered as a $\tau$-tilting pair
         """
         T = self(T) # Make sure that it is an element of `self`
-        return {(M,0) for M in self.projectives(T)} | \
-               {(S,1) for S in self.simples()
-                if T in self.has_support_summand(S, check = False)}
+        return {(M, 0) for M in self.projectives(T)} | \
+               {(S, 1) for S in self.simples()
+                if T in self.has_support_summand(S, check=False)}
 
     def s_tau_tilt_complex(self):
         r"""
-        Return the support $\tau$-tilting simplicial complex of the algebra
+        Return the support $\tau$-tilting simplicial complex of the algebra.
 
         This is a simplicial complex whose simplices are $\tau$-rigid pairs.
-        This is the same as a simplicial complex of 2-term silting complexes, called $\Delta(A)$ in [DIJ].
-        There are some papers studying this simplicial complex, e.g. [AMN].
+        This is the same as a simplicial complex of 2-term silting complexes, called $\Delta(A)$ in [DIJ]_.
+        There are some papers studying this simplicial complex, e.g. [AMN]_.
 
         OUTPUT:
 
@@ -763,21 +768,21 @@ class FiniteTorsLattice(FiniteLatticePoset):
            Int. Math. Res. Not. IMRN 3, 852--892 (2019).
 
         .. [AMN] H. Asashiba, Y. Mizuno, K. Nakashima,
-           Simplicial complexes and tilting theory for Brauer tree algebras,
+           *Simplicial complexes and tilting theory for Brauer tree algebras*,
            J. Algebra 551 (2020), 119--153.
         """
         return SimplicialComplex([self.tau_rigid_pair_summand(T) for T in self],
-                                 maximality_check = False)
+                                 maximality_check=False)
 
     def positive_tau_tilt_complex(self):
         r"""
-        Return the positive $\tau$-tilting simplicial complex of the algebra
+        Return the positive $\tau$-tilting simplicial complex of the algebra.
 
         This is a full subcomplex of the support $\tau$-tilting complex
         consisting of $\tau$-tilting modules, that is, $\tau$-tilting pairs of
-        the form $(M,0)$. See [G] for example.
+        the form $(M,0)$. See [G]_ for example.
         Historically, this is a simplicial complex associated with tilting modules
-        studied by [RS] and [U] for the hereditary case.
+        studied by [RS]_ and [U]_ for the hereditary case.
 
         OUTPUT:
 
@@ -791,20 +796,19 @@ class FiniteTorsLattice(FiniteLatticePoset):
            arXiv:2105.07974
 
         .. [RS] C. Riedtmann and A. Schofield,
-           On a simplicial complex associated with tilting modules,
+           *On a simplicial complex associated with tilting modules*,
            Comment. Math. Helv. 66 (1991), no. 1, 70--78.
 
         .. [U] L. Unger,
-           Shellability of simplicial complexes arising in representation theory,
+           *Shellability of simplicial complexes arising in representation theory*,
            Adv. Math. 144 (1999), no. 2, 221--246.
         """
         return SimplicialComplex([self.projectives(T) for T in self if self.is_sincere(T)],
-                                 maximality_check = False)
-
+                                 maximality_check=False)
 
     def number_of_projs(self, arg):
         r"""
-        Return the number of indecomposable Ext-projective objects in a given subcategory
+        Return the number of indecomposable Ext-projective objects in a given subcategory.
 
         If ``arg`` is an element of ``self`` (i.e. a torsion class),
         then the considered category is ``arg`` itself.
@@ -828,5 +832,5 @@ class FiniteTorsLattice(FiniteLatticePoset):
             U, T = self.zero(), arg
         U, T = self(U), self(T) # Make sure that they are elements of `self`
 
-        T_minus_U = {M for M in self.projectives(T) if not self.is_lequal(M,U)}
+        T_minus_U = {M for M in self.projectives(T) if not self.is_lequal(M, U)}
         return len(T_minus_U)
